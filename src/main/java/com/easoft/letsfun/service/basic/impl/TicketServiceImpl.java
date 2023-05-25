@@ -14,13 +14,13 @@ import com.easoft.letsfun.service.basic.TicketService;
 
 @Transactional
 @Service
-public class TicketServiceImpl implements TicketService {
+public class TicketServiceImpl extends BaseDomainService implements TicketService {
 
 	@Autowired
 	private TicketRepository repository;
 
 	@Override
-	public List<TicketDto> getTicketListByUserId(Long id) {
+	public List<TicketDto> getTicketListByUserId(Long id, Class<?>... entites) {
 
 		List<TicketDto> result = null;
 
@@ -44,7 +44,7 @@ public class TicketServiceImpl implements TicketService {
 	}
 
 	@Override
-	public List<TicketDto> getTicketListByActivityId(Long id) {
+	public List<TicketDto> getTicketListByActivityId(Long id, Class<?>... entites) {
 		List<TicketDto> result = null;
 
 		List<TicketDefinition> resultEntityList = null;
@@ -90,49 +90,7 @@ public class TicketServiceImpl implements TicketService {
 	}
 
 	@Override
-	public TicketDto getTicketWithActivityById(Long id) {
-		TicketDto result = null;
-
-		TicketDefinition resultEntity = null;
-
-		try {
-
-			resultEntity = repository.findById(id).orElse(null);
-			if (resultEntity != null) {
-				result = new TicketDto().withActivity(resultEntity);
-
-			}
-
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-		return result;
-	}
-
-	@Override
-	public TicketDto getTicketWithWithUserById(Long id) {
-		TicketDto result = null;
-
-		TicketDefinition resultEntity = null;
-
-		try {
-
-			resultEntity = repository.findById(id).orElse(null);
-			if (resultEntity != null) {
-				result = new TicketDto().withUser(resultEntity);
-
-			}
-
-		} catch (Exception e) {
-			// TODO: handle exception
-		}
-
-		return result;
-	}
-
-	@Override
-	public TicketDto getTicketById(Long id) {
+	public TicketDto getTicketById(Long id, Class<?>... entites) {
 		TicketDto result = null;
 
 		TicketDefinition resultEntity = null;
@@ -142,6 +100,7 @@ public class TicketServiceImpl implements TicketService {
 			resultEntity = repository.findById(id).orElse(null);
 			if (resultEntity != null) {
 				result = new TicketDto(resultEntity);
+				lazyInvoke(resultEntity, result, entites);
 
 			}
 
@@ -163,7 +122,7 @@ public class TicketServiceImpl implements TicketService {
 
 			resultEntity = repository.save(dto.copyToEntity(new TicketDefinition()));
 			if (resultEntity != null) {
-				result = new TicketDto().single(resultEntity);
+				result = new TicketDto(resultEntity);
 			}
 
 		} catch (Exception e) {
@@ -184,7 +143,7 @@ public class TicketServiceImpl implements TicketService {
 			resultEntity = repository.findById(dto.getId()).orElse(null);
 			if (resultEntity != null) {
 				resultEntity = repository.saveAndFlush(dto.copyToEntity(resultEntity));
-				result = new TicketDto().single(resultEntity);
+				result = new TicketDto(resultEntity);
 			}
 
 		} catch (Exception e) {

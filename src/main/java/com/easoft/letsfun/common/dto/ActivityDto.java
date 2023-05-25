@@ -41,7 +41,12 @@ public class ActivityDto extends BaseDto {
 
 	private ActivityDetailDto details;
 
-	private void setter(ActivityDefinition entity) {
+	public ActivityDto() {
+
+	}
+
+	public ActivityDto(ActivityDefinition entity) {
+
 		id = entity.getId();
 		title = entity.getTitle();
 		content = entity.getContent();
@@ -51,36 +56,8 @@ public class ActivityDto extends BaseDto {
 		status = entity.getStatus();
 		cdate = entity.getCdate();
 		edate = entity.getEdate();
-		convertEntityToDto(entity.getDetails());
-	}
+		details = new ActivityDetailDto(entity.getDetails());
 
-	public ActivityDto() {
-
-	}
-
-	public ActivityDto(ActivityDefinition entity) {
-		setter(entity);
-		convertEntityToDto(entity.getCreatedUser());
-		convertEntityToDto(entity.getDetails());
-	}
-
-	public ActivityDto single(ActivityDefinition entity) {
-		setter(entity);
-		return this;
-	}
-
-	public ActivityDto withUser(ActivityDefinition entity) {
-		setter(entity);
-		convertEntityToDto(entity.getCreatedUser());
-		return this;
-	}
-
-	private void convertEntityToDto(UserDefinition user) {
-		createdUser = new UserDto().single(user);
-	}
-
-	private void convertEntityToDto(ActivityDetail activityDetail) {
-		details = new ActivityDetailDto(activityDetail);
 	}
 
 	@Override
@@ -104,6 +81,14 @@ public class ActivityDto extends BaseDto {
 
 		return model;
 	}
-	
+
+	@Override
+	public void setLazyClass(BaseEntity baseEntity) {
+
+		if (baseEntity instanceof UserDefinition) {
+			createdUser = new UserDto((UserDefinition) baseEntity);
+		}
+
+	}
 
 }

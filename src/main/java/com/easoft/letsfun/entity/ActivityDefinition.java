@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.easoft.letsfun.common.aspect.LazyInvoke;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -55,6 +57,7 @@ public class ActivityDefinition extends BaseEntity {
 	@Column(name = "edate")
 	private Date edate;
 	
+	@LazyInvoke
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cuser_id", referencedColumnName = "id")
     private UserDefinition createdUser;

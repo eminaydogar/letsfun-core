@@ -37,6 +37,7 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+		
 
 		Map<String, RoleType[]> securityMap = urlSecurityConfigurer.getUrlSecurityMap();
 		

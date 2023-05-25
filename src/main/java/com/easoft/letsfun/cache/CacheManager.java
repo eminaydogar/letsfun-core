@@ -1,6 +1,7 @@
 package com.easoft.letsfun.cache;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,19 +9,21 @@ import java.util.Map.Entry;
 
 import com.easoft.letsfun.common.CoreQueryService;
 import com.easoft.letsfun.entity.resultset.ObjectValue;
+import com.easoft.letsfun.util.ObjectUtilty;
 
-public class CacheHolder {
+public class CacheManager {
 
 	private static Map<Long, ObjectValue> cacheObjectMap = new HashMap<>();
 
-	private CacheHolder() {
+
+	private CacheManager() {
 
 	}
 
 	public static void load() {
-		if (cacheObjectMap == null || cacheObjectMap.size() == 0) {
+		if (ObjectUtilty.isEmpty(cacheObjectMap)) {
 			List<ObjectValue> itemList = CoreQueryService
-					.findListByNativeQuery("select * from object_value_item where status=?", ObjectValue.class, 'Y');
+					.findListByNativeQuery("select * from object_value where status=?", ObjectValue.class, 'Y');
 			if (itemList != null && itemList.size() > 0) {
 				for (ObjectValue item : itemList) {
 					cacheObjectMap.put(item.getId(), item);
@@ -69,7 +72,7 @@ public class CacheHolder {
 	public static void refresh() {
 		cacheObjectMap.clear();
 		List<ObjectValue> itemList = CoreQueryService
-				.findListByNativeQuery("select * from object_value_item where status=?", ObjectValue.class, 'Y');
+				.findListByNativeQuery("select * from object_value where status=?", ObjectValue.class, 'Y');
 		if (itemList != null && itemList.size() > 0) {
 			for (ObjectValue item : itemList) {
 				cacheObjectMap.put(item.getId(), item);

@@ -30,7 +30,7 @@ public class MessageContentLogServiceImpl implements MessageContentLogService {
 		try {
 			MessageContentLogList entity = repository.findById(id).orElse(null);
 			if (entity != null) {
-				result = new MessageContentLogListDto().single(entity);
+				result = new MessageContentLogListDto(entity);
 			}
 
 		} catch (Exception e) {
@@ -41,7 +41,8 @@ public class MessageContentLogServiceImpl implements MessageContentLogService {
 	}
 
 	@Override
-	public List<MessageContentLogListDto> getMessageContentLogListByMessageTypeAndUserId(Long messageType, Long userid) {
+	public List<MessageContentLogListDto> getMessageContentLogListByMessageTypeAndUserId(Long messageType,
+			Long userid) {
 		List<MessageContentLogListDto> result = null;
 
 		try {
@@ -72,7 +73,7 @@ public class MessageContentLogServiceImpl implements MessageContentLogService {
 			dto.setStatus("Y");
 			entityResult = repository.save(dto.copyToEntity(new MessageContentLogList()));
 			if (entityResult != null) {
-				result = new MessageContentLogListDto().single(entityResult);
+				result = new MessageContentLogListDto(entityResult);
 			}
 
 		} catch (Exception e) {
@@ -89,11 +90,10 @@ public class MessageContentLogServiceImpl implements MessageContentLogService {
 		try {
 			entityResult = repository.findById(dto.getId()).orElse(null);
 
-			if(entityResult!=null) {
+			if (entityResult != null) {
 				entityResult = repository.saveAndFlush(dto.copyToEntity(entityResult));
-				result = new MessageContentLogListDto().single(entityResult);
+				result = new MessageContentLogListDto(entityResult);
 			}
-			
 
 		} catch (Exception e) {
 			log.error("update e ", e);
@@ -105,7 +105,7 @@ public class MessageContentLogServiceImpl implements MessageContentLogService {
 	@Override
 	public void deleteById(Long id) {
 		repository.deleteById(id);
-		
+
 	}
 
 }

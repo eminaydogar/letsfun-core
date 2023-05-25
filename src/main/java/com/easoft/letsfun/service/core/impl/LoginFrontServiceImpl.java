@@ -60,7 +60,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 	@Autowired
 	private DocumentContentService documentService;
 
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<LoginControlResponse> loginControl(LoginControlRequest request) {
 		UserDto user = null;
@@ -68,7 +68,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		BaseResponse<LoginControlResponse> response = new BaseResponse<>();
 
 		try {
-			user = userService.getSimpleUserByUsername(request.getUsername());
+			user = userService.getUserByUsername(request.getUsername());
 			if (user != null && PasswordCrypter.instance().matches(request.getPassword(), user.getPassword())) {
 				
 				user.setLastLoginDate(new Date());
@@ -102,7 +102,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		return response;
 	}
 
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED,  rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<RegisterResponse> register(RegisterRequest request) {
 
@@ -169,14 +169,14 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		return response;
 	}
 
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<RegisterVerifyResponse> registerVerify(RegisterVerifyRequest request) {
 
 		BaseResponse<RegisterVerifyResponse> response = new BaseResponse<>();
 		RegisterVerifyResponse verifyResponse = null;
 		try {
-			UserDto user = userService.getSimpleUserByUsername(request.getUsername());
+			UserDto user = userService.getUserByUsername(request.getUsername());
 			if (user == null || "Y".equalsIgnoreCase(user.getVertify())) {
 				throw new ServiceOperationException("User has already verify");
 			}

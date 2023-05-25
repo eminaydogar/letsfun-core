@@ -14,35 +14,20 @@ import com.easoft.letsfun.service.basic.ActivityService;
 
 @Transactional
 @Service
-public class ActivityServiceImpl implements ActivityService {
+public class ActivityServiceImpl extends BaseDomainService implements ActivityService {
 
 	@Autowired
 	private ActivityRepositoriy repo;
 
 	@Override
-	public ActivityDto getActivityWithUserById(Long id) {
+	public ActivityDto getActivityById(Long id, Class<?>... entites) {
 		ActivityDto result = null;
 		ActivityDefinition activity = null;
 		try {
 			activity = repo.findById(1L).orElse(null);
 			if (activity != null) {
-				result = new ActivityDto().withUser(activity);
-			}
-		} catch (Exception e) {
-
-		}
-
-		return result;
-	}
-
-	@Override
-	public ActivityDto getActivityById(Long id) {
-		ActivityDto result = null;
-		ActivityDefinition activity = null;
-		try {
-			activity = repo.findById(1L).orElse(null);
-			if (activity != null) {
-				result = new ActivityDto().single(activity);
+				result = new ActivityDto(activity);
+				lazyInvoke(activity, result, entites);
 			}
 		} catch (Exception e) {
 
@@ -60,7 +45,7 @@ public class ActivityServiceImpl implements ActivityService {
 			if (activityList != null && !activityList.isEmpty()) {
 				result = new ArrayList<>();
 				for (ActivityDefinition entity : activityList) {
-					result.add(new ActivityDto().single(entity));
+					result.add(new ActivityDto(entity));
 				}
 			}
 		} catch (Exception e) {
@@ -80,7 +65,7 @@ public class ActivityServiceImpl implements ActivityService {
 			activityDefinition = repo.save(dto.copyToEntity(new ActivityDefinition()));
 
 			if (activityDefinition != null) {
-				result = new ActivityDto().single(activityDefinition);
+				result = new ActivityDto(activityDefinition);
 			}
 
 		} catch (Exception e) {
@@ -100,7 +85,7 @@ public class ActivityServiceImpl implements ActivityService {
 			if (entity != null) {
 				entity = dto.copyToEntity(entity);
 				entity = repo.saveAndFlush(entity);
-				result = new ActivityDto().single(entity);
+				result = new ActivityDto(entity);
 			}
 
 		} catch (Exception e) {
@@ -119,7 +104,7 @@ public class ActivityServiceImpl implements ActivityService {
 			if (activityList != null && !activityList.isEmpty()) {
 				result = new ArrayList<>();
 				for (ActivityDefinition entity : activityList) {
-						result.add(new ActivityDto().single(entity));
+					result.add(new ActivityDto(entity));
 				}
 			}
 		} catch (Exception e) {

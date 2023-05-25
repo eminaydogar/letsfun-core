@@ -6,9 +6,8 @@ import com.easoft.letsfun.common.dto.ActivityDto;
 
 public interface ActivityService {
 
-	public ActivityDto getActivityWithUserById(Long id);
 
-	public ActivityDto getActivityById(Long id);
+	public ActivityDto getActivityById(Long id,Class<?>... entites);
 	
 	public List<ActivityDto> getActivityListByCreatedUserId(Long id);
 

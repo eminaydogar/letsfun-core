@@ -18,5 +18,7 @@ public abstract class BaseDto implements Serializable {
 
 	public abstract Object copyToEntity(BaseEntity entity);
 	
+	public abstract void setLazyClass(BaseEntity entity);
+	
 
 }

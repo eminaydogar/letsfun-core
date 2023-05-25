@@ -37,6 +37,7 @@ import com.easoft.letsfun.service.basic.TicketService;
 import com.easoft.letsfun.service.basic.UserService;
 import com.easoft.letsfun.service.core.AccountFrontService;
 import com.easoft.letsfun.util.CacheUtil;
+import com.easoft.letsfun.util.ObjectUtilty;
 import com.easoft.letsfun.util.SecureUtility;
 
 import lombok.extern.slf4j.Slf4j;
@@ -201,7 +202,7 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 
 				List<ActivityDto> userCreatedActivityList = activityService.getActivityListByCreatedUserId(request.getUserId());
 				
-				if (userCreatedActivityList != null && !userCreatedActivityList.isEmpty()) {
+				if (!ObjectUtilty.isEmpty(userCreatedActivityList)) {
 					
 					activityBeanList = new ArrayList<>();
 					

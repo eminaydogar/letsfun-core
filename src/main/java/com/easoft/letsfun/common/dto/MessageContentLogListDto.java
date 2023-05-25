@@ -56,15 +56,17 @@ public class MessageContentLogListDto extends BaseDto {
 
 	public MessageContentLogListDto(MessageContentLogList entity) {
 		BeanUtils.copyProperties(entity, this, "relatedUser");
-		this.relatedUser = new UserDto().single(entity.getRelatedUser());
-	}
-
-	public MessageContentLogListDto single(MessageContentLogList entity) {
-		BeanUtils.copyProperties(entity, this, "relatedUser");
-		return this;
 	}
 
 	public MessageContentLogListDto() {
+
+	}
+
+	@Override
+	public void setLazyClass(BaseEntity baseEntity) {
+		if (baseEntity instanceof UserDefinition) {
+			relatedUser = new UserDto((UserDefinition) baseEntity);
+		}
 
 	}
 

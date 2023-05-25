@@ -13,6 +13,7 @@ public enum CacheConstant {
 	VERIFICATION_CODE_LENGTH("VERIFICATION_CODE_LENGTH"),
 	MAIL_CHANNEL("MAIL_CHANNEL"),
 	VERIFICATION_MAIL_CONTENT("VERIFICATION_MAIL_CONTENT"),
+    INVITATION_TEMPLATE("INVITATION_TEMPLATE"),
 	REJECT_USER_DISABLED("REJECT_USER_DISABLED");
 	
 
@@ -27,7 +28,7 @@ public enum CacheConstant {
 	}
 	
 	public String getValue() {
-		ObjectValue value = CacheHolder.getItemByObjectCode(objectCode);
+		ObjectValue value = CacheManager.getItemByObjectCode(objectCode);
 
 		if (value != null) {
 			return value.getObjectName();
@@ -36,7 +37,7 @@ public enum CacheConstant {
 	}
 	
 	public Long Id() {
-		ObjectValue value = CacheHolder.getItemByObjectCode(objectCode);
+		ObjectValue value = CacheManager.getItemByObjectCode(objectCode);
 
 		if (value != null) {
 			return value.getId();

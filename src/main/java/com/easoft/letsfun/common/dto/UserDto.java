@@ -32,7 +32,7 @@ public class UserDto extends BaseDto {
 	private String isBlackList;
 	private byte[] image;
 	private String status;
-	private Set<RoleDto> roles;
+	private Set<RoleDto> roles = new HashSet<>();
 
 	public UserDto() {
 
@@ -40,8 +40,6 @@ public class UserDto extends BaseDto {
 
 	public UserDto(UserDefinition user) {
 		setter(user);
-		this.roles = userRoleDtoConverter(user.getRoles());
-
 	}
 
 	private void setter(UserDefinition user) {
@@ -58,30 +56,17 @@ public class UserDto extends BaseDto {
 		}
 	}
 
-	public UserDto single(UserDefinition user) {
-		setter(user);
-		return this;
-	}
-
-	public UserDto withRoles(UserDefinition user) {
-		setter(user);
-		this.roles = userRoleDtoConverter(user.getRoles());
-		return this;
-	}
-
-	/*
-	 * Set<DTO> Converters FOR FECTH_TYPE = EAGER
-	 * 
-	 */
-	private Set<RoleDto> userRoleDtoConverter(Set<RoleDefinition> roles) {
-		Set<RoleDto> roleDtoSet = new HashSet<RoleDto>();
+	public void setEntityRoles(Set<RoleDefinition> roles) {
 		if (roles != null) {
 			for (RoleDefinition role : roles) {
 				RoleDto model = new RoleDto(role);
-				roleDtoSet.add(model);
+				this.roles.add(model);
 			}
 		}
-		return roleDtoSet;
+	}
+
+	public void setRoles(Set<RoleDto> roles) {
+		this.roles = roles;
 	}
 
 	private Set<RoleDefinition> userRoleEntityConverter(Set<RoleDto> roles) {
@@ -115,6 +100,15 @@ public class UserDto extends BaseDto {
 		}
 
 		return model;
+	}
+
+	@Override
+	public void setLazyClass(BaseEntity baseEntity) {
+		if (baseEntity instanceof RoleDefinition) {
+			RoleDto roleDto = new RoleDto((RoleDefinition) baseEntity);
+			roles.add(roleDto);
+		}
+
 	}
 
 }

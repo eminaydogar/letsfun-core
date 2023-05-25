@@ -51,4 +51,10 @@ public class DocumentContentDto extends BaseDto {
 
 	}
 
+	@Override
+	public void setLazyClass(BaseEntity entity) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

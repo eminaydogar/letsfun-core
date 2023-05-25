@@ -6,17 +6,13 @@ import com.easoft.letsfun.common.dto.TicketDto;
 
 public interface TicketService {
 
-	List<TicketDto> getTicketListByUserId(Long id);
+	List<TicketDto> getTicketListByUserId(Long id, Class<?>... entites);
 
-	List<TicketDto> getTicketListByActivityId(Long id);
+	List<TicketDto> getTicketListByActivityId(Long id, Class<?>... entites);
 
 	List<TicketDto> getTicketList();
 
-	TicketDto getTicketWithActivityById(Long id);
-
-	TicketDto getTicketWithWithUserById(Long id);
-
-	TicketDto getTicketById(Long id);
+	TicketDto getTicketById(Long id, Class<?>... entites);
 
 	public TicketDto save(TicketDto dto);
 

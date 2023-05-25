@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
-import com.easoft.letsfun.cache.CacheHolder;
+import com.easoft.letsfun.cache.CacheManager;
 
 //@Import({ SwaggerConfig.class })
 @SpringBootApplication
@@ -17,7 +17,7 @@ public class LetsFunCoreApplication {
 
 	@Bean
 	public void load() {
-		CacheHolder.load();
+		CacheManager.load();
 	}
 
 }

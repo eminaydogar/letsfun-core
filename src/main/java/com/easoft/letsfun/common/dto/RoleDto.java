@@ -35,4 +35,10 @@ public class RoleDto extends BaseDto {
 		return model;
 	}
 
+	@Override
+	public void setLazyClass(BaseEntity entity) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

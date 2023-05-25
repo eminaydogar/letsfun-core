@@ -3,6 +3,7 @@ package com.easoft.letsfun.security.configuration;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.FilterChain;
@@ -23,10 +24,12 @@ import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.filter.GenericFilterBean;
 
-import com.easoft.letsfun.cache.CacheHolder;
+import com.easoft.letsfun.cache.CacheManager;
 import com.easoft.letsfun.cache.ObjectValueTypeConstant;
 import com.easoft.letsfun.common.exception.FirewallException;
+import com.easoft.letsfun.common.exception.ServiceOperationException;
 import com.easoft.letsfun.entity.resultset.ObjectValue;
+import com.easoft.letsfun.security.IpAdressModel;
 import com.easoft.letsfun.service.basic.LoggerService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +55,10 @@ public class FirewallConfig extends GenericFilterBean {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
 			throws IOException, ServletException {
 		try {
+
+			System.out.println("--------FILTERCHAIN---------");
 			chain.doFilter(req, res);
+			
 		} catch (RequestRejectedException e) {
 			HttpServletRequest request = (HttpServletRequest) req;
 			HttpServletResponse response = (HttpServletResponse) res;
@@ -65,18 +71,37 @@ public class FirewallConfig extends GenericFilterBean {
 			loggerService.saveError(666L, "FirewallConfig.doFilter", e, request.getRemoteHost());
 
 			throw new FirewallException("Request rejected : " + e.getMessage());
-		}
+		} 
 	}
 
 	private List<String> getUrlSecureList() {
-		CacheHolder.load();
+		CacheManager.load();
 		List<String> urlSecureList = new ArrayList<>();
-		List<ObjectValue> values = CacheHolder.getItemsByObjectType(ObjectValueTypeConstant.SECURE_HOST);
+		List<ObjectValue> values = CacheManager.getItemsByObjectType(ObjectValueTypeConstant.SECURE_HOST);
 		if (values != null && !values.isEmpty()) {
 			for (ObjectValue value : values) {
 				urlSecureList.add(value.getObjectName());
 			}
 		}
 		return urlSecureList;
+	}
+
+	private void ipControl(ServletRequest req) throws ServletException {
+
+		IpAdressModel model = SecurityCacheService.getIpAddress(req);
+		if (model == null) {
+			SecurityCacheService.setIpAddress(req);
+		} else {
+
+			if (model.getRequestCount() >= 5) {
+				long seconds = (new Date().getTime() - model.getLastRequestTime().getTime()) / 1000;
+				if (seconds < 10)
+					throw new ServletException("Remote Address Limit Exception");
+			}
+
+			else
+				SecurityCacheService.setIpAddress(req);
+		}
+
 	}
 }

@@ -10,8 +10,6 @@ import com.easoft.letsfun.entity.UserDefinition;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
 public class ActivityJoinRequestDto extends BaseDto {
 
 	/**
@@ -19,58 +17,50 @@ public class ActivityJoinRequestDto extends BaseDto {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	@Getter
+	@Setter
 	private Long id;
 
+	@Getter
+	@Setter
 	private ActivityDto activity;
 
+	@Getter
+	@Setter
 	private String requestStatus;
 
+	@Getter
+	@Setter
 	private UserDto user;
 
+	@Getter
+	@Setter
 	private String rejectReason;
 
+	@Getter
+	@Setter
 	private Date cdate;
-
-	public ActivityJoinRequestDto() {
-
+	
+	public ActivityJoinRequestDto () {
+		
 	}
 
 	public ActivityJoinRequestDto(ActivityJoinRequest entity) {
-		setter(entity);
-		convertEntityToDto(entity.getActivity());
-		convertEntityToDto(entity.getUser());
-	}
-
-	public ActivityJoinRequestDto withUser(ActivityJoinRequest entity) {
-		setter(entity);
-		convertEntityToDto(entity.getUser());
-		return this;
-	}
-
-	public ActivityJoinRequestDto withActivity(ActivityJoinRequest entity) {
-		setter(entity);
-		convertEntityToDto(entity.getActivity());
-		return this;
-	}
-
-	public ActivityJoinRequestDto single(ActivityJoinRequest entity) {
-		setter(entity);
-		return this;
-	}
-
-	private void setter(ActivityJoinRequest entity) {
 		id = entity.getId();
 		requestStatus = entity.getRequestStatus();
 		rejectReason = entity.getRejectReason();
 		cdate = entity.getCdate();
 	}
 
-	private void convertEntityToDto(ActivityDefinition entity) {
-		activity = new ActivityDto().single(entity);
-	}
+	@Override
+	public void setLazyClass(BaseEntity baseEntity) {
 
-	private void convertEntityToDto(UserDefinition entity) {
-		user = new UserDto().single(entity);
+		if (baseEntity instanceof UserDefinition) {
+			user = new UserDto((UserDefinition) baseEntity);
+		} else if (baseEntity instanceof ActivityDefinition) {
+			activity = new ActivityDto((ActivityDefinition) baseEntity);
+		}
+
 	}
 
 	@Override

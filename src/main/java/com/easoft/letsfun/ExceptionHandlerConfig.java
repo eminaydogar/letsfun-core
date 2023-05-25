@@ -1,5 +1,6 @@
 package com.easoft.letsfun;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.Ordered;
@@ -51,19 +52,10 @@ public class ExceptionHandlerConfig extends ResponseEntityExceptionHandler {
 		return entity;
 	}
 	
-	@ExceptionHandler(value = AuthenticationServiceException.class)
-	@ResponseStatus(HttpStatus.NETWORK_AUTHENTICATION_REQUIRED)
-	@ResponseBody
-	public ResponseEntity<BaseResponse<?>> basicAuthSecureException(final AuthenticationServiceException ex,
-			final HttpServletResponse response) {
-		
-		BaseResponse<?> baseResponse = new BaseResponse<>();
-		baseResponse.setFaildResponse(ex);
-		ResponseEntity<BaseResponse<?>> entity = new ResponseEntity<BaseResponse<?>>(baseResponse,
-				HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
 
-		return entity;
-	}
+	
+	
+
 	
 	
 	

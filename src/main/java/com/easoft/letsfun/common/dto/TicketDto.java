@@ -36,41 +36,11 @@ public class TicketDto extends BaseDto {
 	}
 
 	public TicketDto(TicketDefinition entity) {
-		setter(entity);
-		convertEntityToDto(entity.getActivity());
-		convertEntityToDto(entity.getUser());
-	}
-
-	public TicketDto withUser(TicketDefinition entity) {
-		setter(entity);
-		convertEntityToDto(entity.getUser());
-		return this;
-	}
-
-	public TicketDto withActivity(TicketDefinition entity) {
-		setter(entity);
-		convertEntityToDto(entity.getActivity());
-		return this;
-	}
-
-	public TicketDto single(TicketDefinition entity) {
-		setter(entity);
-		return this;
-	}
-
-	private void setter(TicketDefinition entity) {
 		id = entity.getId();
 		content = entity.getContent();
-		status = entity.getStatus();
 		cdate = entity.getCdate();
-	}
+		status = entity.getStatus();
 
-	private void convertEntityToDto(ActivityDefinition entity) {
-		activity = new ActivityDto().single(entity);
-	}
-
-	private void convertEntityToDto(UserDefinition entity) {
-		user = new UserDto().single(entity);
 	}
 
 	@Override
@@ -88,6 +58,16 @@ public class TicketDto extends BaseDto {
 		model.setStatus(status);
 
 		return model;
+	}
+
+	@Override
+	public void setLazyClass(BaseEntity baseEntity) {
+		if (baseEntity instanceof UserDefinition) {
+			user = new UserDto((UserDefinition) baseEntity);
+		} else if (baseEntity instanceof ActivityDefinition) {
+			activity = new ActivityDto((ActivityDefinition) baseEntity);
+		}
+
 	}
 
 }

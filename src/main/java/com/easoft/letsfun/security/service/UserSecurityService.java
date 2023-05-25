@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.easoft.letsfun.common.dto.UserDto;
+import com.easoft.letsfun.entity.RoleDefinition;
 import com.easoft.letsfun.service.basic.UserService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class UserSecurityService {
 		CustomUserDetails customUserDetails = null;
 		try {
 
-			UserDto user = userService.getUserWithRolesByUsername(username);
+			UserDto user = userService.getUserByUsername(username,RoleDefinition.class);
 			if(user!=null) {
 				customUserDetails = new CustomUserDetails();
 				customUserDetails.setUser(user);

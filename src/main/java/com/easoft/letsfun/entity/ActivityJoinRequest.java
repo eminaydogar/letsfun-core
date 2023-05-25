@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.easoft.letsfun.common.aspect.LazyInvoke;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -30,6 +32,7 @@ public class ActivityJoinRequest extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@LazyInvoke
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "activity_id", referencedColumnName = "id")
 	private ActivityDefinition activity;
@@ -37,6 +40,7 @@ public class ActivityJoinRequest extends BaseEntity {
 	@Column(name = "request_status")
 	private String requestStatus;
 
+	@LazyInvoke
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "requesting_user_id", referencedColumnName = "id")
 	private UserDefinition user;

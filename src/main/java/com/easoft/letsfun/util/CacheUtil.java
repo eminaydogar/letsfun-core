@@ -3,7 +3,7 @@ package com.easoft.letsfun.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.easoft.letsfun.cache.CacheHolder;
+import com.easoft.letsfun.cache.CacheManager;
 import com.easoft.letsfun.cache.ObjectValueTypeConstant;
 import com.easoft.letsfun.common.api.bean.AddressBean;
 import com.easoft.letsfun.common.api.bean.ObjectValueBean;
@@ -26,7 +26,7 @@ public class CacheUtil {
 				for (String add : addressList) {
 					try {
 						Long addresId = Long.valueOf(add);
-						ObjectValue objValue = CacheHolder.getItemById(addresId);
+						ObjectValue objValue = CacheManager.getItemById(addresId);
 						if (objValue != null) {
 							if (objValue.getObjectType().equals(ObjectValueTypeConstant.CITY)) {
 								addressBean.setCityCode(objValue.getId());
@@ -56,7 +56,7 @@ public class CacheUtil {
 				for (String feature : featureList) {
 					try {
 						Long featureId = Long.valueOf(feature);
-						ObjectValue objValue = CacheHolder.getItemById(featureId);
+						ObjectValue objValue = CacheManager.getItemById(featureId);
 						if (objValue != null) {
 							ObjectValueBean objValueBean = new ObjectValueBean();
 							objValueBean.setId(objValue.getId());
@@ -81,7 +81,7 @@ public class CacheUtil {
 
 		try {
 			Long convertedId = Long.valueOf(id);
-			ObjectValue objValue = CacheHolder.getItemById(convertedId);
+			ObjectValue objValue = CacheManager.getItemById(convertedId);
 			if (objValue != null) {
 				objValueBean = new ObjectValueBean();
 				objValueBean.setId(objValue.getId());
