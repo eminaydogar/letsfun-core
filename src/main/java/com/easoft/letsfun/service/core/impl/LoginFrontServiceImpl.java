@@ -1,9 +1,7 @@
 package com.easoft.letsfun.service.core.impl;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
@@ -13,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.easoft.letsfun.cache.CacheConstant;
+import com.easoft.letsfun.common.Constants.RECORD_STATUS;
+import com.easoft.letsfun.common.Constants.USER_STATUS;
 import com.easoft.letsfun.common.api.BaseResponse;
 import com.easoft.letsfun.common.api.bean.UserBean;
 import com.easoft.letsfun.common.api.request.login.LoginControlRequest;
@@ -21,19 +21,21 @@ import com.easoft.letsfun.common.api.request.login.RegisterVerifyRequest;
 import com.easoft.letsfun.common.api.response.LoginControlResponse;
 import com.easoft.letsfun.common.api.response.RegisterResponse;
 import com.easoft.letsfun.common.api.response.RegisterVerifyResponse;
-import com.easoft.letsfun.common.dto.DocumentContentDto;
 import com.easoft.letsfun.common.dto.MessageContentLogListDto;
 import com.easoft.letsfun.common.dto.UserDto;
 import com.easoft.letsfun.common.exception.EntityNotFoundException;
 import com.easoft.letsfun.common.exception.ServiceOperationException;
+import com.easoft.letsfun.entity.DocumentContentDefinition;
+import com.easoft.letsfun.entity.MessageContentLogList;
+import com.easoft.letsfun.entity.UserDefinition;
 import com.easoft.letsfun.security.PasswordCrypter;
 import com.easoft.letsfun.security.RoleType;
-import com.easoft.letsfun.service.basic.DocumentContentService;
-import com.easoft.letsfun.service.basic.EmailService;
-import com.easoft.letsfun.service.basic.LoggerService;
-import com.easoft.letsfun.service.basic.MessageContentLogService;
-import com.easoft.letsfun.service.basic.UserService;
 import com.easoft.letsfun.service.core.LoginFrontService;
+import com.easoft.letsfun.service.domain.DocumentContentService;
+import com.easoft.letsfun.service.domain.EmailService;
+import com.easoft.letsfun.service.domain.LoggerService;
+import com.easoft.letsfun.service.domain.MessageContentLogService;
+import com.easoft.letsfun.service.domain.UserService;
 import com.easoft.letsfun.util.CacheUtil;
 import com.easoft.letsfun.util.MailUtil;
 import com.easoft.letsfun.util.ObjectUtilty;
@@ -63,19 +65,22 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<LoginControlResponse> loginControl(LoginControlRequest request) {
-		UserDto user = null;
+
+		UserDefinition user = null;
 		LoginControlResponse loginControlResponse = null;
 		BaseResponse<LoginControlResponse> response = new BaseResponse<>();
 
 		try {
 			user = userService.getUserByUsername(request.getUsername());
 			if (user != null && PasswordCrypter.instance().matches(request.getPassword(), user.getPassword())) {
-				
-				user.setLastLoginDate(new Date());
-				user = userService.update(user);
-				
+
+				UserDto userDto = new UserDto(user);
+				userDto.setLastLoginDate(new Date());
+
+				user = userService.update(userDto);
+
 				loginControlResponse = new LoginControlResponse();
-				
+
 				UserBean userBean = new UserBean();
 
 				userBean.setUsername(user.getUsername());
@@ -85,11 +90,10 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 				userBean.setPhoneNumber(user.getPhoneNumber());
 				userBean.setVertify(user.getVertify());
 				userBean.setStatus(user.getStatus());
-				
+
 				loginControlResponse.setUser(userBean);
 				response.setSuccessResponse(loginControlResponse);
-				
-				
+
 			} else {
 				throw new EntityNotFoundException("Username or Password invalid");
 			}
@@ -102,7 +106,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		return response;
 	}
 
-	@Transactional(value = TxType.REQUIRED,  rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<RegisterResponse> register(RegisterRequest request) {
 
@@ -123,26 +127,26 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 			user.setCdate(new Date());
 			user.setEmail(request.getEmail());
 			user.setImage(request.getImage());
-			user.setIsBlackList("N");
+			user.setIsBlackList(RECORD_STATUS.INACTIVE);
 			user.setPassword(PasswordCrypter.instance().encode(request.getPassword()));
 			user.setPhoneNumber(request.getPhoneNumber());
 			user.setUsername(request.getUsername());
-			user.setVertify("N");
+			user.setVertify(RECORD_STATUS.INACTIVE);
 			user.setRoles(RoleType.USER.getUserRole());
 
-			UserDto saveUser = userService.save(user);
+			UserDefinition saveUser = userService.save(user);
 
 			if (saveUser != null) {
 
-				MessageContentLogListDto messageContentLogDto = generateVertifyCodeAndLog(saveUser);
+				MessageContentLogList messageLog = generateVertifyCodeAndLog(user);
 
-				DocumentContentDto document = documentService
+				DocumentContentDefinition document = documentService
 						.getDocumentContentByType(CacheConstant.VERIFICATION_MAIL_CONTENT.Id());
 				if (document != null) {
 					String mailContent = document.getContent();
 					Map<String, String> contentMap = new HashMap<>();
 					contentMap.put("%USERNAME%", user.getUsername());
-					contentMap.put("%VERIFICATION_CODE%", messageContentLogDto.getMessageContent());
+					contentMap.put("%VERIFICATION_CODE%", messageLog.getMessageContent());
 					mailContent = MailUtil.editContent(contentMap, mailContent);
 					mailService.sendMailAsync(user.getEmail(), "Verification Mail", mailContent, true);
 				}
@@ -155,7 +159,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 				userBean.setImage(user.getImage());
 				userBean.setPhoneNumber(user.getPhoneNumber());
 				userBean.setVertify(user.getVertify());
-				
+
 				registerResponse.setUser(userBean);
 				response.setSuccessResponse(registerResponse);
 			}
@@ -176,33 +180,30 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		BaseResponse<RegisterVerifyResponse> response = new BaseResponse<>();
 		RegisterVerifyResponse verifyResponse = null;
 		try {
-			UserDto user = userService.getUserByUsername(request.getUsername());
-			if (user == null || "Y".equalsIgnoreCase(user.getVertify())) {
+			UserDefinition user = userService.getUserByUsername(request.getUsername());
+			if (user == null || USER_STATUS.ACTIVE.equalsIgnoreCase(user.getVertify())) {
 				throw new ServiceOperationException("User has already verify");
 			}
-			List<MessageContentLogListDto> messageContentList = messageContentLogService
-					.getMessageContentLogListByMessageTypeAndUserId(CacheConstant.VERIFICATION_MAIL_SENDING.Id(),
-							user.getId());
-			if (messageContentList != null && !messageContentList.isEmpty()) {
-				MessageContentLogListDto message = null;
-				if (messageContentList.size() > 1) {
-					messageContentList.sort(Comparator.comparing(MessageContentLogListDto::getEdate));
-				}
-				message = messageContentList.get(0);
+			MessageContentLogList messageContentLog = messageContentLogService.getListByMessageTypeAndUserIdAndContent(
+					CacheConstant.VERIFICATION_MAIL_SENDING.Id(), user.getId(), request.getVerifyCode());
 
-				if (message.getEdate() != null && message.getEdate().after(new Date())) {
-					if (request.getVerifyCode().equals(message.getMessageContent())) {
-						user.setVertify("Y");
-						user = userService.update(user);
-						message.setStatus("N");
-						message = messageContentLogService.update(message);
-						verifyResponse = new RegisterVerifyResponse();
-						verifyResponse.setProcessDate(new Date());
-						verifyResponse.setSuccess(true);
-						verifyResponse.setVerifyUserName(user.getUsername());
-					} else {
-						throw new ServiceOperationException("Verification codes do not match");
-					}
+			if (messageContentLog != null) {
+
+				if (messageContentLog.getEdate() != null && messageContentLog.getEdate().after(new Date())) {
+
+					UserDto userDto = new UserDto(user);
+					user.setVertify(USER_STATUS.ACTIVE);
+					user = userService.update(userDto);
+
+					MessageContentLogListDto messageLogDto = new MessageContentLogListDto(messageContentLog);
+
+					messageLogDto.setStatus(RECORD_STATUS.INACTIVE);
+					messageContentLog = messageContentLogService.update(messageLogDto);
+
+					verifyResponse = new RegisterVerifyResponse();
+					verifyResponse.setProcessDate(new Date());
+					verifyResponse.setSuccess(true);
+					verifyResponse.setVerifyUserName(user.getUsername());
 
 				} else {
 					throw new ServiceOperationException("Your verification code has expired");
@@ -215,8 +216,9 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 			response.setSuccessResponse(verifyResponse);
 
 		} catch (Exception e) {
-			log.error("registerVerify e ",e);
-			loggerService.saveError(CacheConstant.PROCESS_SERVIS_ERROR.Id(), "registerVerify", e, request.getClientIp());
+			log.error("registerVerify e ", e);
+			loggerService.saveError(CacheConstant.PROCESS_SERVIS_ERROR.Id(), "registerVerify", e,
+					request.getClientIp());
 			response.setFaildResponse(e);
 		}
 
@@ -224,7 +226,7 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 
 	}
 
-	private MessageContentLogListDto generateVertifyCodeAndLog(UserDto user) {
+	private MessageContentLogList generateVertifyCodeAndLog(UserDto user) {
 		String vertifyCode = SecureUtility.getInstance()
 				.generateVertifyCode(Integer.valueOf(CacheConstant.VERIFICATION_CODE_LENGTH.getValue()));
 		MessageContentLogListDto dto = new MessageContentLogListDto();
@@ -233,8 +235,9 @@ public class LoginFrontServiceImpl implements LoginFrontService {
 		dto.setMessageContent(vertifyCode);
 		dto.setMessageType(CacheConstant.VERIFICATION_MAIL_SENDING.Id());
 		dto.setRelatedUser(user);
-		dto = messageContentLogService.save(dto);
-		return dto;
+
+		MessageContentLogList log = messageContentLogService.save(dto);
+		return log;
 	}
 
 }

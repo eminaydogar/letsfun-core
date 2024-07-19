@@ -30,7 +30,7 @@ import com.easoft.letsfun.common.exception.FirewallException;
 import com.easoft.letsfun.common.exception.ServiceOperationException;
 import com.easoft.letsfun.entity.resultset.ObjectValue;
 import com.easoft.letsfun.security.IpAdressModel;
-import com.easoft.letsfun.service.basic.LoggerService;
+import com.easoft.letsfun.service.domain.LoggerService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,8 +56,10 @@ public class FirewallConfig extends GenericFilterBean {
 			throws IOException, ServletException {
 		try {
 
-			System.out.println("--------FILTERCHAIN---------");
+			System.out.println("--------FILTERCHAIN START---------");
 			chain.doFilter(req, res);
+			
+			System.out.println("--------FILTERCHAIN DONE---------");
 			
 		} catch (RequestRejectedException e) {
 			HttpServletRequest request = (HttpServletRequest) req;

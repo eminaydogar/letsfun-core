@@ -1,4 +1,4 @@
-package com.easoft.letsfun.service.basic.impl;
+package com.easoft.letsfun.service.domain.impl;
 
 import java.util.Date;
 
@@ -12,7 +12,7 @@ import com.easoft.letsfun.common.dto.LogDto;
 import com.easoft.letsfun.common.exception.ServiceOperationException;
 import com.easoft.letsfun.entity.LogDefinition;
 import com.easoft.letsfun.repository.LogRepository;
-import com.easoft.letsfun.service.basic.LoggerService;
+import com.easoft.letsfun.service.domain.LoggerService;
 
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

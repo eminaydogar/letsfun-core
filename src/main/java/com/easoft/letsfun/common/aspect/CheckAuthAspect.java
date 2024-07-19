@@ -54,7 +54,7 @@ public class CheckAuthAspect {
 				for (Field requestField : requestFields) {
 					try {
 						requestField.setAccessible(true);
-						if (requestField.getName().equals("userId") || requestField.getName().equals("userid")) {
+						if (requestField.getName().equalsIgnoreCase("userid")) {
 							userId = Long.valueOf(requestField.get(requestValue).toString());
 							break;
 						}
@@ -79,7 +79,6 @@ public class CheckAuthAspect {
 
 					}
 				} else {
-
 					throw new AuthorizationException("Cannot forward request. Auth security dedected");
 
 				}

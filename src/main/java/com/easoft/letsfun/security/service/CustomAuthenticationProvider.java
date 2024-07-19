@@ -5,10 +5,11 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import com.easoft.letsfun.entity.UserDefinition;
 import com.easoft.letsfun.security.PasswordCrypter;
+import com.easoft.letsfun.service.domain.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,10 +17,10 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-	private final UserSecurityService securityService;
+	private final UserService userService;
 
-	public CustomAuthenticationProvider(UserSecurityService securityService) {
-		this.securityService = securityService;
+	public CustomAuthenticationProvider(UserService userService) {
+		this.userService = userService;
 	}
 
 	@Override
@@ -28,7 +29,9 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		String username = authentication.getName();
 		String password = authentication.getCredentials().toString();
 
-		UserDetails user = securityService.loadUserByUsername(username);
+		UserDefinition userDefinition = userService.getUserByUsername(username);
+		
+		CustomUserDetails user = new CustomUserDetails(userDefinition);
 			
 		if (user==null || !username.equalsIgnoreCase(user.getUsername())
 				|| !PasswordCrypter.instance().matches(password, user.getPassword())) {

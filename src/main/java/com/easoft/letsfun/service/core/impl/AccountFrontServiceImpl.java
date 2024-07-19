@@ -9,8 +9,10 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.easoft.letsfun.cache.CacheConstant;
+import com.easoft.letsfun.common.Constants.RECORD_STATUS;
 import com.easoft.letsfun.common.api.BaseResponse;
 import com.easoft.letsfun.common.api.bean.ActivityBean;
 import com.easoft.letsfun.common.api.bean.ActivityDetailBean;
@@ -28,14 +30,18 @@ import com.easoft.letsfun.common.dto.TicketDto;
 import com.easoft.letsfun.common.dto.UserDto;
 import com.easoft.letsfun.common.exception.EntityNotFoundException;
 import com.easoft.letsfun.common.exception.ServiceOperationException;
+import com.easoft.letsfun.entity.ActivityDefinition;
+import com.easoft.letsfun.entity.ActivityJoinRequest;
+import com.easoft.letsfun.entity.TicketDefinition;
+import com.easoft.letsfun.entity.UserDefinition;
 import com.easoft.letsfun.security.PasswordCrypter;
 import com.easoft.letsfun.service.BaseService;
-import com.easoft.letsfun.service.basic.ActivityJoinRequestService;
-import com.easoft.letsfun.service.basic.ActivityService;
-import com.easoft.letsfun.service.basic.LoggerService;
-import com.easoft.letsfun.service.basic.TicketService;
-import com.easoft.letsfun.service.basic.UserService;
 import com.easoft.letsfun.service.core.AccountFrontService;
+import com.easoft.letsfun.service.domain.ActivityJoinRequestService;
+import com.easoft.letsfun.service.domain.ActivityService;
+import com.easoft.letsfun.service.domain.LoggerService;
+import com.easoft.letsfun.service.domain.TicketService;
+import com.easoft.letsfun.service.domain.UserService;
 import com.easoft.letsfun.util.CacheUtil;
 import com.easoft.letsfun.util.ObjectUtilty;
 import com.easoft.letsfun.util.SecureUtility;
@@ -62,31 +68,35 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 	private LoggerService loggerService;
 
 	@CheckAuth
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<UserUpdateResponse> updateUserAllProperties(UserUpdateRequest request) {
+		
 		BaseResponse<UserUpdateResponse> response = new BaseResponse<>();
 		UserUpdateResponse userResponse = null;
 		boolean passwordChanged = false;
 
 		try {
 
-			UserDto user = userService.getSimpleUserById(request.getUserId());
+			UserDefinition user = userService.getVerifiedUserById(request.getUserId());
+			
 			if (user != null) {
-				if (isVerifiedUser(user)) {
-					user.setAddress(request.getAddress());
-					user.setEmail(request.getEmail());
-					user.setPhoneNumber(request.getPhoneNumber());
-					user.setImage(request.getImage());
+				
+				UserDto userDto = new UserDto(user);
+				
+				userDto.setAddress(request.getAddress());
+				userDto.setEmail(request.getEmail());
+				userDto.setPhoneNumber(request.getPhoneNumber());
+				userDto.setImage(request.getImage());
 					if (request.isPasswordChange() && request.getNewPassword() != null
 							&& request.getPassword() != null) {
 						if (PasswordCrypter.instance().matches(request.getPassword(), user.getPassword())) {
-							user.setPassword(PasswordCrypter.instance().encode(request.getNewPassword()));
+							userDto.setPassword(PasswordCrypter.instance().encode(request.getNewPassword()));
 							passwordChanged = true;
 						}
 					}
 
-					user = userService.update(user);
+					user = userService.update(userDto);
 
 					userResponse = new UserUpdateResponse();
 					UserBean userBean = new UserBean();
@@ -103,11 +113,8 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 					userResponse.setUser(userBean);
 					response.setSuccessResponse(userResponse);
 
-				} else {
-					throw new ServiceOperationException("The operation was rejected because the user was not verified");
-				}
-
-			} else
+				} 
+			 else
 				throw new EntityNotFoundException("Failed to fetch user information");
 
 		} catch (Exception e) {
@@ -121,55 +128,69 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 	}
 
 	@CheckAuth
-	@Transactional(value = TxType.REQUIRES_NEW, rollbackOn = Exception.class)
+	@Transactional(value = TxType.REQUIRED, rollbackOn = Exception.class)
 	@Override
 	public BaseResponse<String> deleteAccount(UserDeleteAccountRequest request) {
 		BaseResponse<String> response = new BaseResponse<>();
 		String result = null;
 
 		try {
-			UserDto user = userService.getSimpleUserById(request.getUserId());
+			UserDefinition user = userService.getUserById(request.getUserId());
 			if (user != null && "Y".equalsIgnoreCase(user.getStatus())) {
 
-				List<ActivityDto> activityList = activityService.getActivityListByCreatedUserId(request.getUserId());
-				if (activityList != null && !activityList.isEmpty()) {
-					for (ActivityDto activity : activityList) {
-						if ("Y".equals(activity.getStatus())) {
-							activity.setStatus("N");
-							activity.setEdate(new Date());
-							activityService.update(activity);
-						}
+				UserDto userDto = new UserDto(user);
+				
+				List<ActivityDefinition> activityList = activityService.getActiveActivityListByCreatedUserId(request.getUserId());
+				
+				if (!CollectionUtils.isEmpty(activityList)) {
+					
+					for (ActivityDefinition activity : activityList) {
+						
+							ActivityDto activityDto = new ActivityDto(activity);
+							
+							activityDto.setStatus(RECORD_STATUS.INACTIVE);
+							activityDto.setEdate(new Date());
+							activityService.update(activityDto);
+						
 
 					}
 				}
 
-				List<ActivityJoinRequestDto> activityJoinRequestList = activityJoinRequestService
+				List<ActivityJoinRequest> activityJoinRequestList = activityJoinRequestService
 						.getActivityJoinRequestListByUserId(request.getUserId());
 
 				if (activityJoinRequestList != null && !activityJoinRequestList.isEmpty()) {
-					for (ActivityJoinRequestDto activityRequest : activityJoinRequestList) {
+					for (ActivityJoinRequest activityRequest : activityJoinRequestList) {
+						
 						if ("Y".equals(activityRequest.getRequestStatus())) {
-							activityRequest.setRequestStatus("N");
-							activityRequest.setRejectReason(CacheConstant.REJECT_USER_DISABLED.getValue());
-							activityJoinRequestService.updateEntity(activityRequest);
+							
+							ActivityJoinRequestDto activityJoinRequestDto = new ActivityJoinRequestDto(activityRequest);
+							
+							activityJoinRequestDto.setRequestStatus("N");
+							activityJoinRequestDto.setRejectReason(CacheConstant.REJECT_USER_DISABLED.getValue());
+							activityJoinRequestService.updateEntity(activityJoinRequestDto);
 						}
 
 					}
 				}
 
-				List<TicketDto> ticketList = ticketService.getTicketListByUserId(request.getUserId());
+				List<TicketDefinition> ticketList = ticketService.getTicketListByUserId(request.getUserId());
 
 				if (ticketList != null && !ticketList.isEmpty()) {
-					for (TicketDto ticket : ticketList) {
-						if ("Y".equals(ticket.getStatus())) {
-							ticket.setStatus("N");
-							ticketService.update(ticket);
+					
+					for (TicketDefinition ticket : ticketList) {
+						
+						TicketDto ticketDto = new TicketDto(ticket);
+						
+						if ("Y".equals(ticketDto.getStatus())) {
+							ticketDto.setStatus("N");
+							ticketService.update(ticketDto);
 						}
 					}
 				}
 
 				user.setStatus("N");
-				userService.update(user);
+				userService.update(userDto);
 				result = "User disabled successfully";
 				response.setResponse(result);
 
@@ -194,19 +215,19 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 
 		try {
 
-			UserDto user = userService.getSimpleUserById(request.getUserId());
+			UserDefinition user = userService.getUserById(request.getUserId());
 			if (user != null) {
 				userActivityInfoResponse = new UserActivityInfoResponse();
 				List<ActivityBean> activityBeanList = null;
 				List<ActivityJoinRequestBean> activityJoinRequestBeanList = null;
 
-				List<ActivityDto> userCreatedActivityList = activityService.getActivityListByCreatedUserId(request.getUserId());
+				List<ActivityDefinition> userCreatedActivityList = activityService.getActivityListByCreatedUserId(request.getUserId());
 				
 				if (!ObjectUtilty.isEmpty(userCreatedActivityList)) {
 					
 					activityBeanList = new ArrayList<>();
 					
-					for (ActivityDto createdActivity : userCreatedActivityList) {
+					for (ActivityDefinition createdActivity : userCreatedActivityList) {
 						
 						ActivityBean activityBean = new ActivityBean();
 						activityBean.setAdvertImage(createdActivity.getAdvertImage());
@@ -239,13 +260,13 @@ public class AccountFrontServiceImpl extends BaseService implements AccountFront
 					}
 				}
 
-				List<ActivityJoinRequestDto> activityJoinRequestList = activityJoinRequestService.getActivityJoinRequestListByUserId(request.getUserId());
+				List<ActivityJoinRequest> activityJoinRequestList = activityJoinRequestService.getActivityJoinRequestListByUserId(request.getUserId());
 
 				if (activityJoinRequestList != null && !activityJoinRequestList.isEmpty()) {
 					
 					activityJoinRequestBeanList = new ArrayList<>();
 					
-					for (ActivityJoinRequestDto activityJoinRequest : activityJoinRequestList) {
+					for (ActivityJoinRequest activityJoinRequest : activityJoinRequestList) {
 						
 						ActivityJoinRequestBean activityJoinRequestBean = new ActivityJoinRequestBean();
 						activityJoinRequestBean.setCdate(activityJoinRequest.getCdate());

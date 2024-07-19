@@ -7,8 +7,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.easoft.letsfun.common.dto.RoleDto;
-import com.easoft.letsfun.common.dto.UserDto;
+import com.easoft.letsfun.common.Constants.RECORD_STATUS;
+import com.easoft.letsfun.common.Constants.USER_STATUS;
+import com.easoft.letsfun.entity.RoleDefinition;
+import com.easoft.letsfun.entity.UserDefinition;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Setter;
@@ -16,11 +18,12 @@ import lombok.Setter;
 public class CustomUserDetails implements UserDetails {
 
 	private static final long serialVersionUID = 2396654715019746670L;
+	private static final String AUTH_ROLE = "ROLE_";
 
 	@Setter
-	private UserDto user;
+	private UserDefinition user;
 
-	public CustomUserDetails(UserDto user) {
+	public CustomUserDetails(UserDefinition user) {
 		this.user = user;
 	}
 
@@ -31,8 +34,8 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		ArrayList<SimpleGrantedAuthority> authorities = new ArrayList<SimpleGrantedAuthority>();
-		for (RoleDto role : this.user.getRoles())
-			authorities.add(new SimpleGrantedAuthority("ROLE_" + role.getName()));
+		for (RoleDefinition role : this.user.getRoles())
+			authorities.add(new SimpleGrantedAuthority(AUTH_ROLE + role.getName()));
 		return authorities;
 	}
 
@@ -56,7 +59,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return !"Y".equals(user.getIsBlackList());
+		return RECORD_STATUS.INACTIVE.equals(user.getIsBlackList());
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public class CustomUserDetails implements UserDetails {
 	@Override
 	public boolean isEnabled() {
 		// TODO Auto-generated method stub
-		return "Y".equals(user.getStatus());
+		return USER_STATUS.ACTIVE.equals(user.getStatus());
 	}
 
 }

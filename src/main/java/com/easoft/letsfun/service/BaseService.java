@@ -12,5 +12,5 @@ public abstract class BaseService {
 	public boolean isVerifiedUser(UserDto user) {
 		return "Y".equalsIgnoreCase(user.getVertify());
 	}
-
+	
 }

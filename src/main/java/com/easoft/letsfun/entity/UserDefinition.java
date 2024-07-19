@@ -16,9 +16,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
-import com.easoft.letsfun.common.aspect.LazyInvoke;
-import com.easoft.letsfun.common.dto.UserDto;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -71,12 +68,13 @@ public class UserDefinition extends BaseEntity{
 	@Column(name="status")
 	private String status;
 
-	@LazyInvoke
-	@ManyToMany(cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinTable(name = "user_role_list", joinColumns = { @JoinColumn(name = "user_id") }, inverseJoinColumns = {
 			@JoinColumn(name = "role_id") })
 	private Set<RoleDefinition> roles;
 	
+
 
 
 }

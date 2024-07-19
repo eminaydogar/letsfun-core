@@ -1,4 +1,4 @@
-package com.easoft.letsfun.service.basic.impl;
+package com.easoft.letsfun.service.domain.impl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;

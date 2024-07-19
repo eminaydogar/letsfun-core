@@ -1,6 +1,5 @@
-package com.easoft.letsfun.service.basic.impl;
+package com.easoft.letsfun.service.domain.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.easoft.letsfun.common.dto.DocumentContentDto;
 import com.easoft.letsfun.entity.DocumentContentDefinition;
 import com.easoft.letsfun.repository.DocumentContentRepository;
-import com.easoft.letsfun.service.basic.DocumentContentService;
+import com.easoft.letsfun.service.domain.DocumentContentService;
 
 @Transactional
 @Service
@@ -20,87 +19,71 @@ public class DocumentServiceImpl implements DocumentContentService {
 	DocumentContentRepository repository;
 
 	@Override
-	public DocumentContentDto getDocumentContentById(Long id) {
+	public DocumentContentDefinition getDocumentContentById(Long id) {
 
-		DocumentContentDto result = null;
 
 		DocumentContentDefinition entity = null;
 
 		try {
 			entity = repository.findById(id).orElse(null);
-			if (entity != null) {
-				result = new DocumentContentDto(entity);
-			}
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return result;
+		return entity;
 	}
 
 	@Override
-	public DocumentContentDto getDocumentContentByType(Long typeId) {
-		DocumentContentDto result = null;
+	public DocumentContentDefinition getDocumentContentByType(Long typeId) {
+	
 
 		DocumentContentDefinition entity = null;
 
 		try {
 			entity = repository.findByDocumentType(typeId);
-			if (entity != null) {
-				result = new DocumentContentDto(entity);
-			}
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return result;
+		return entity;
 	}
 
 	@Override
-	public List<DocumentContentDto> getAllDocumentContent() {
-		List<DocumentContentDto> result = null;
+	public List<DocumentContentDefinition> getAllDocumentContent() {
+	
 
 		List<DocumentContentDefinition> entityList = null;
 
 		try {
 			entityList = repository.findAll();
-			if (entityList != null && !entityList.isEmpty()) {
-				result = new ArrayList<>();
-				for (DocumentContentDefinition entity : entityList) {
-					result.add(new DocumentContentDto(entity));
-				}
-
-			}
+			
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return result;
+		return entityList;
 	}
 
 	@Override
-	public DocumentContentDto save(DocumentContentDto dto) {
+	public DocumentContentDefinition save(DocumentContentDto dto) {
 
-		DocumentContentDto result = null;
 
 		DocumentContentDefinition resultEntity = null;
 
 		try {
 			resultEntity = repository.save(dto.copyToEntity(new DocumentContentDefinition()));
-			if (resultEntity != null) {
-				result = new DocumentContentDto(resultEntity);
-			}
+		
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return result;
+		return resultEntity;
 	}
 
 	@Override
-	public DocumentContentDto update(DocumentContentDto dto) {
-
-		DocumentContentDto result = null;
+	public DocumentContentDefinition update(DocumentContentDto dto) {
 
 		DocumentContentDefinition resultEntity = null;
 
@@ -109,13 +92,12 @@ public class DocumentServiceImpl implements DocumentContentService {
 
 			if (resultEntity != null) {
 				resultEntity = repository.saveAndFlush(dto.copyToEntity(resultEntity));
-				result = new DocumentContentDto(resultEntity);
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
 
-		return result;
+		return resultEntity;
 	}
 
 }

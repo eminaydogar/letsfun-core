@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.easoft.letsfun.common.dto.DocumentContentDto;
 import com.easoft.letsfun.message.MessageConstant;
-import com.easoft.letsfun.service.basic.EmailService;
+import com.easoft.letsfun.service.domain.EmailService;
 
 @Component
 public class InvitationConsumer {

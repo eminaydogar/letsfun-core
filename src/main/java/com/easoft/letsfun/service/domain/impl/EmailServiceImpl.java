@@ -1,4 +1,4 @@
-package com.easoft.letsfun.service.basic.impl;
+package com.easoft.letsfun.service.domain.impl;
 
 import java.io.File;
 import java.util.Date;
@@ -16,8 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.easoft.letsfun.cache.CacheConstant;
 import com.easoft.letsfun.common.dto.LogDto;
-import com.easoft.letsfun.service.basic.EmailService;
-import com.easoft.letsfun.service.basic.LoggerService;
+import com.easoft.letsfun.service.domain.EmailService;
+import com.easoft.letsfun.service.domain.LoggerService;
 
 import lombok.extern.slf4j.Slf4j;
 

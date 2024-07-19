@@ -16,4 +16,7 @@ public interface MessageContentLogListRepository extends JpaRepository<MessageCo
 	List<MessageContentLogList> findByMessageTypeAndRelatedUserAndStatus(Long messageType, Long relatedUserId,
 			String status);
 
+	MessageContentLogList findByMessageTypeAndRelatedUserAndMessageContentAndStatus(Long messageType, Long userid,
+			String content, String string);
+
 }

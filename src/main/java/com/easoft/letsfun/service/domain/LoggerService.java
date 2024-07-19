@@ -1,4 +1,4 @@
-package com.easoft.letsfun.service.basic;
+package com.easoft.letsfun.service.domain;
 
 import com.easoft.letsfun.common.dto.LogDto;
 

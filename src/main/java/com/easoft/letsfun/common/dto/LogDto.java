@@ -30,6 +30,10 @@ public class LogDto extends BaseDto {
 	private String clientIp;
 
 	private Date cdate;
+	
+	private Date edate;
+	
+	private Long elapsedTime;
 
 	public LogDto() {
 
@@ -43,6 +47,7 @@ public class LogDto extends BaseDto {
 		resultExplanation = entity.getResultExplanation();
 		clientIp = entity.getClientIp();
 		cdate = entity.getCdate();
+		
 	}
 
 	@Override
@@ -55,6 +60,8 @@ public class LogDto extends BaseDto {
 		model.setResultExplanation(resultExplanation);
 		model.setClientIp(clientIp);
 		model.setCdate(cdate);
+		model.setEdate(edate);
+		model.setElapsedTime(elapsedTime);
 		return model;
 	}
 

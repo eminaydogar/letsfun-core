@@ -15,5 +15,8 @@ public interface ActivityRepositoriy extends JpaRepository<ActivityDefinition, L
 
 	@Query(value = "select a from ActivityDefinition a where a.createdUser.id=?1")
 	public List<ActivityDefinition> findByCreatedUserId(Long userId);
+	
+	@Query(value = "select a from ActivityDefinition a where a.createdUser.id=?1 and status=?2 ")
+	public List<ActivityDefinition> findByCreatedUserIdAndStatus(Long userId,String status);
 
 }

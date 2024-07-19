@@ -39,4 +39,10 @@ public class LogDefinition extends BaseEntity {
 
 	@Column(name = "cdate")
 	private Date cdate;
+	
+	@Column(name = "edate")
+	private Date edate;
+	
+	@Column(name = "elapsed_time")
+	private Long elapsedTime;
 }

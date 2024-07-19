@@ -43,7 +43,7 @@ public class SecurityConfig {
 		
 		return http.csrf().disable().authorizeRequests(v -> {
 			
-			v.antMatchers("/test/**", "/swagger-ui/**", "/about").permitAll();
+			v.antMatchers("**/test/**", "/swagger-ui/**", "/about").permitAll();
 			
 			for (String path : securityMap.keySet()) {
 				
